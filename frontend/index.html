@@ -1,1 +1,297 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NOVA WeatherSense</title><link rel="stylesheet" href="style.css"></head><body><div class="app"><header><div><div class="brand">NOVA</div><h1>WeatherSense</h1><p>Smart IoT Weather Monitoring System</p></div><div id="connection" class="status offline">● OFFLINE</div></header><main><section class="hero"><div><span class="eyebrow">LIVE DEVICE DATA</span><h2 id="condition">Waiting for sensor...</h2><p id="updated">No data received yet</p></div><div class="device"><span>DEVICE</span><strong id="deviceId">—</strong></div></section><section class="grid"><article class="card"><span>🌡️ Temperature</span><strong><span id="temp">--</span><small> °C</small></strong></article><article class="card"><span>💧 Humidity</span><strong><span id="humidity">--</span><small> %</small></strong></article><article class="card"><span>🌧️ Rain Sensor</span><strong id="rain">--</strong></article><article class="card"><span>📡 Device Status</span><strong id="deviceStatus">--</strong></article></section><section class="info"><div><span>Location</span><strong id="location">Not configured</strong></div><div><span>Forecast</span><strong id="forecast">Internet weather coming next</strong></div></section></main><footer>NOVA WeatherSense • IoT Weather Monitoring</footer></div><script src="app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>NOVA WeatherSense</title>
+
+  <link
+    rel="stylesheet"
+    href="style.css"
+  >
+</head>
+
+
+<body>
+
+  <div class="app">
+
+    <!-- ================= HEADER ================= -->
+
+    <header>
+
+      <div>
+
+        <div class="brand">
+          NOVA
+        </div>
+
+        <h1>
+          WeatherSense
+        </h1>
+
+        <p>
+          Smart IoT Weather Monitoring System
+        </p>
+
+      </div>
+
+
+      <div
+        id="connection"
+        class="status offline"
+      >
+        ● OFFLINE
+      </div>
+
+    </header>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main>
+
+
+      <!-- ================= HERO ================= -->
+
+      <section class="hero">
+
+        <div>
+
+          <span class="eyebrow">
+            LIVE DEVICE DATA
+          </span>
+
+          <h2 id="condition">
+            Waiting for sensor...
+          </h2>
+
+          <p id="updated">
+            No data received yet
+          </p>
+
+        </div>
+
+
+        <div class="device">
+
+          <span>
+            DEVICE
+          </span>
+
+          <strong id="deviceId">
+            —
+          </strong>
+
+        </div>
+
+      </section>
+
+
+
+      <!-- ================= SENSOR CARDS ================= -->
+
+      <section class="grid">
+
+
+        <!-- Temperature -->
+
+        <article class="card">
+
+          <span>
+            🌡️ Temperature
+          </span>
+
+          <strong>
+
+            <span id="temp">
+              --
+            </span>
+
+            <small>
+              °C
+            </small>
+
+          </strong>
+
+        </article>
+
+
+
+        <!-- Humidity -->
+
+        <article class="card">
+
+          <span>
+            💧 Humidity
+          </span>
+
+          <strong>
+
+            <span id="humidity">
+              --
+            </span>
+
+            <small>
+              %
+            </small>
+
+          </strong>
+
+        </article>
+
+
+
+        <!-- Rain Sensor -->
+
+        <article class="card">
+
+          <span>
+            🌧️ Rain Sensor
+          </span>
+
+          <strong id="rain">
+            --
+          </strong>
+
+        </article>
+
+
+
+        <!-- Device Status -->
+
+        <article class="card">
+
+          <span>
+            📡 Device Status
+          </span>
+
+          <strong id="deviceStatus">
+            --
+          </strong>
+
+        </article>
+
+      </section>
+
+
+
+      <!-- ================= INTERNET WEATHER ================= -->
+
+      <section class="info">
+
+
+        <!-- Location -->
+
+        <div>
+
+          <span>
+            📍 Location
+          </span>
+
+          <strong id="location">
+            Loading...
+          </strong>
+
+        </div>
+
+
+
+        <!-- Internet Weather -->
+
+        <div>
+
+          <span>
+            ☁️ Internet Weather
+          </span>
+
+          <strong id="forecast">
+            Loading...
+          </strong>
+
+        </div>
+
+
+
+        <!-- Rain Probability -->
+
+        <div>
+
+          <span>
+            🌦️ Rain Probability
+          </span>
+
+          <strong id="rainProbability">
+            --
+          </strong>
+
+        </div>
+
+
+
+        <!-- Wind -->
+
+        <div>
+
+          <span>
+            💨 Wind Speed
+          </span>
+
+          <strong id="wind">
+            --
+          </strong>
+
+        </div>
+
+
+      </section>
+
+
+
+      <!-- ================= SMART STATUS ================= -->
+
+      <section class="smart-status">
+
+        <span>
+          🤖 SMART WEATHER STATUS
+        </span>
+
+        <h2 id="smartStatus">
+          Analyzing weather...
+        </h2>
+
+      </section>
+
+
+    </main>
+
+
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+      NOVA WeatherSense
+      •
+      IoT Weather Monitoring
+
+    </footer>
+
+
+  </div>
+
+
+
+  <!-- ================= JAVASCRIPT ================= -->
+
+  <script src="app.js"></script>
+
+</body>
+
+</html>
