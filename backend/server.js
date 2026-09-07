@@ -2,15 +2,19 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
+
 const PORT = process.env.PORT || 10000;
+
+// =====================================================
+// MIDDLEWARE
+// =====================================================
 
 app.use(cors());
 app.use(express.json());
 
-
-// ===============================
-// SENSOR DATA
-// ===============================
+// =====================================================
+// CURRENT SENSOR DATA
+// =====================================================
 
 let weatherData = {
   deviceId: "nova-weather-01",
@@ -21,13 +25,24 @@ let weatherData = {
   lastUpdate: null
 };
 
+// =====================================================
+// SENSOR HISTORY
+// =====================================================
 
-// ===============================
-// INTERNET WEATHER DATA
-// ===============================
+// Keep latest 60 readings
+// ESP sends every 10 seconds
+// 60 readings ≈ 10 minutes
+
+let sensorHistory = [];
+
+const MAX_HISTORY = 60;
+
+// =====================================================
+// INTERNET WEATHER
+// =====================================================
 
 let internetWeather = {
-  location: process.env.WEATHER_LOCATION || "Not configured",
+  location: process.env.WEATHER_LOCATION || "Begusarai, Bihar",
   temperature: null,
   feelsLike: null,
   condition: "Unavailable",
@@ -37,115 +52,18 @@ let internetWeather = {
   lastUpdate: null
 };
 
+// =====================================================
+// WEATHER CACHE
+// =====================================================
 
-// Weather API cache
 let lastWeatherFetch = 0;
 
-const WEATHER_CACHE_TIME = 10 * 60 * 1000;
+const WEATHER_CACHE_TIME =
+  10 * 60 * 1000;
 
-
-// ===============================
-// HOME ROUTE
-// ===============================
-
-app.get("/", (req, res) => {
-  res.json({
-    project: "NOVA WeatherSense",
-    status: "ONLINE",
-    message: "WeatherSense backend is running"
-  });
-});
-
-
-// ===============================
-// HEALTH CHECK
-// ===============================
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ONLINE",
-    time: new Date().toISOString()
-  });
-});
-
-
-// ===============================
-// RECEIVE ESP8266 SENSOR DATA
-// ===============================
-
-app.post("/api/sensor", (req, res) => {
-
-  const {
-    deviceId,
-    temperature,
-    humidity,
-    rain
-  } = req.body;
-
-
-  if (
-    typeof temperature !== "number" ||
-    typeof humidity !== "number"
-  ) {
-
-    return res.status(400).json({
-      success: false,
-      message: "temperature and humidity must be numbers"
-    });
-
-  }
-
-
-  weatherData = {
-
-    deviceId: deviceId || "nova-weather-01",
-
-    temperature,
-
-    humidity,
-
-    rain: rain || "UNKNOWN",
-
-    wifi: "ONLINE",
-
-    lastUpdate: new Date().toISOString()
-
-  };
-
-
-  console.log(
-    "Sensor Data Received:",
-    weatherData
-  );
-
-
-  res.json({
-
-    success: true,
-
-    message: "Sensor data received",
-
-    data: weatherData
-
-  });
-
-});
-
-
-// ===============================
-// GET SENSOR DATA
-// ===============================
-
-app.get("/api/sensor", (req, res) => {
-
-  res.json(weatherData);
-
-});
-
-
-// ===============================
-// FETCH INTERNET WEATHER
-// ===============================
+// =====================================================
+// OPENWEATHER
+// =====================================================
 
 async function fetchInternetWeather() {
 
@@ -158,218 +76,398 @@ async function fetchInternetWeather() {
   const lon =
     process.env.WEATHER_LON;
 
-
-  // Check configuration
-
   if (!apiKey || !lat || !lon) {
 
-    throw new Error(
-      "Weather API configuration missing"
+    console.log(
+      "OpenWeather configuration missing"
     );
 
+    return internetWeather;
   }
 
+  // Use cached weather if available
 
-  // Current weather API
+  if (
+    Date.now() - lastWeatherFetch <
+    WEATHER_CACHE_TIME &&
+    internetWeather.lastUpdate
+  ) {
 
-  const currentURL =
-    `https://api.openweathermap.org/data/2.5/weather` +
-    `?lat=${lat}` +
-    `&lon=${lon}` +
-    `&appid=${apiKey}` +
-    `&units=metric`;
-
-
-  // Forecast API
-
-  const forecastURL =
-    `https://api.openweathermap.org/data/2.5/forecast` +
-    `?lat=${lat}` +
-    `&lon=${lon}` +
-    `&appid=${apiKey}` +
-    `&units=metric`;
-
-
-  // Call both APIs
-
-  const [
-    currentResponse,
-    forecastResponse
-  ] = await Promise.all([
-
-    fetch(currentURL),
-
-    fetch(forecastURL)
-
-  ]);
-
-
-  // Check current weather response
-
-  if (!currentResponse.ok) {
-
-    throw new Error(
-      `Current weather API error: ${currentResponse.status}`
-    );
-
+    return internetWeather;
   }
-
-
-  // Check forecast response
-
-  if (!forecastResponse.ok) {
-
-    throw new Error(
-      `Forecast API error: ${forecastResponse.status}`
-    );
-
-  }
-
-
-  const current =
-    await currentResponse.json();
-
-  const forecast =
-    await forecastResponse.json();
-
-
-  // ===============================
-  // RAIN PROBABILITY
-  // Next 24 hours
-  // ===============================
-
-  const next24Hours =
-    forecast.list.slice(0, 8);
-
-
-  const rainProbability = Math.round(
-
-    Math.max(
-
-      ...next24Hours.map(item =>
-
-        Number(item.pop || 0) * 100
-
-      )
-
-    )
-
-  );
-
-
-  // ===============================
-  // SAVE WEATHER DATA
-  // ===============================
-
-  internetWeather = {
-
-    location:
-      process.env.WEATHER_LOCATION ||
-      current.name ||
-      "Unknown",
-
-
-    temperature:
-      current.main?.temp ?? null,
-
-
-    feelsLike:
-      current.main?.feels_like ?? null,
-
-
-    condition:
-      current.weather?.[0]?.description ||
-      "Unknown",
-
-
-    humidity:
-      current.main?.humidity ?? null,
-
-
-    wind:
-      current.wind?.speed ?? null,
-
-
-    rainProbability,
-
-
-    lastUpdate:
-      new Date().toISOString()
-
-  };
-
-
-  lastWeatherFetch =
-    Date.now();
-
-
-  console.log(
-    "Internet Weather Updated:",
-    internetWeather
-  );
-
-
-  return internetWeather;
-
-}
-
-
-// ===============================
-// WEATHER API ENDPOINT
-// ===============================
-
-app.get("/api/weather", async (req, res) => {
 
   try {
 
-    // Fetch new weather data
-    // only every 10 minutes
+    // ==========================================
+    // CURRENT WEATHER
+    // ==========================================
 
-    if (
-      Date.now() - lastWeatherFetch >
-      WEATHER_CACHE_TIME
-    ) {
+    const currentURL =
+      "https://api.openweathermap.org/data/2.5/weather" +
+      `?lat=${lat}` +
+      `&lon=${lon}` +
+      `&appid=${apiKey}` +
+      `&units=metric`;
 
-      await fetchInternetWeather();
+    const currentResponse =
+      await fetch(currentURL);
 
+    if (!currentResponse.ok) {
+
+      throw new Error(
+        `Current weather HTTP ${currentResponse.status}`
+      );
     }
 
+    const current =
+      await currentResponse.json();
 
-    res.json({
+    // ==========================================
+    // FORECAST
+    // ==========================================
 
-      success: true,
+    const forecastURL =
+      "https://api.openweathermap.org/data/2.5/forecast" +
+      `?lat=${lat}` +
+      `&lon=${lon}` +
+      `&appid=${apiKey}` +
+      `&units=metric`;
 
-      data: internetWeather
+    const forecastResponse =
+      await fetch(forecastURL);
 
-    });
+    if (!forecastResponse.ok) {
 
-  }
+      throw new Error(
+        `Forecast HTTP ${forecastResponse.status}`
+      );
+    }
 
-  catch (error) {
+    const forecast =
+      await forecastResponse.json();
+
+    // ==========================================
+    // RAIN PROBABILITY
+    // ==========================================
+
+    let maxRainProbability = 0;
+
+    if (
+      forecast.list &&
+      forecast.list.length
+    ) {
+
+      // Next 24 hours
+      const next24Hours =
+        forecast.list.slice(0, 8);
+
+      for (
+        const item of next24Hours
+      ) {
+
+        if (
+          typeof item.pop === "number"
+        ) {
+
+          const probability =
+            item.pop * 100;
+
+          if (
+            probability >
+            maxRainProbability
+          ) {
+
+            maxRainProbability =
+              probability;
+          }
+        }
+      }
+    }
+
+    // ==========================================
+    // SAVE WEATHER
+    // ==========================================
+
+    internetWeather = {
+
+      location:
+        process.env.WEATHER_LOCATION ||
+        "Begusarai, Bihar",
+
+      temperature:
+        current.main?.temp ?? null,
+
+      feelsLike:
+        current.main?.feels_like ?? null,
+
+      condition:
+        current.weather?.[0]?.description ||
+        "Unavailable",
+
+      humidity:
+        current.main?.humidity ?? null,
+
+      wind:
+        current.wind?.speed ?? null,
+
+      rainProbability:
+        Math.round(
+          maxRainProbability
+        ),
+
+      lastUpdate:
+        new Date().toISOString()
+    };
+
+    lastWeatherFetch =
+      Date.now();
+
+    console.log(
+      "Internet Weather Updated:",
+      internetWeather
+    );
+
+    return internetWeather;
+
+  } catch (error) {
 
     console.error(
-      "Weather Error:",
+      "Weather API Error:",
       error.message
     );
 
+    return internetWeather;
+  }
+}
 
-    res.status(500).json({
+// =====================================================
+// HOME
+// =====================================================
 
-      success: false,
+app.get("/", (req, res) => {
 
-      message:
-        "Unable to fetch internet weather"
+  res.json({
+
+    project:
+      "NOVA WeatherSense",
+
+    status:
+      "ONLINE",
+
+    message:
+      "WeatherSense backend is running"
+
+  });
+
+});
+
+// =====================================================
+// HEALTH
+// =====================================================
+
+app.get(
+  "/api/health",
+  (req, res) => {
+
+    res.json({
+
+      status:
+        "ONLINE",
+
+      time:
+        new Date().toISOString()
 
     });
 
   }
+);
 
-});
+// =====================================================
+// RECEIVE SENSOR DATA
+// =====================================================
 
+app.post(
+  "/api/sensor",
+  (req, res) => {
 
-// ===============================
+    const {
+      deviceId,
+      temperature,
+      humidity,
+      rain
+    } = req.body;
+
+    // Validate sensor data
+
+    if (
+      typeof temperature !== "number" ||
+      typeof humidity !== "number"
+    ) {
+
+      return res.status(400).json({
+
+        success:
+          false,
+
+        message:
+          "temperature and humidity must be numbers"
+
+      });
+
+    }
+
+    // ==========================================
+    // UPDATE CURRENT DATA
+    // ==========================================
+
+    weatherData = {
+
+      deviceId:
+        deviceId ||
+        "nova-weather-01",
+
+      temperature,
+
+      humidity,
+
+      rain:
+        rain ||
+        "UNKNOWN",
+
+      wifi:
+        "ONLINE",
+
+      lastUpdate:
+        new Date().toISOString()
+
+    };
+
+    // ==========================================
+    // ADD TO HISTORY
+    // ==========================================
+
+    sensorHistory.push({
+
+      temperature,
+
+      humidity,
+
+      rain:
+        rain ||
+        "UNKNOWN",
+
+      timestamp:
+        new Date().toISOString()
+
+    });
+
+    // ==========================================
+    // LIMIT HISTORY
+    // ==========================================
+
+    if (
+      sensorHistory.length >
+      MAX_HISTORY
+    ) {
+
+      sensorHistory.shift();
+
+    }
+
+    console.log(
+      "Sensor Data Received:",
+      weatherData
+    );
+
+    console.log(
+      `History Points: ${sensorHistory.length}`
+    );
+
+    // ==========================================
+    // RESPONSE
+    // ==========================================
+
+    res.json({
+
+      success:
+        true,
+
+      message:
+        "Sensor data received",
+
+      data:
+        weatherData
+
+    });
+
+  }
+);
+
+// =====================================================
+// CURRENT SENSOR DATA
+// =====================================================
+
+app.get(
+  "/api/sensor",
+  (req, res) => {
+
+    res.json(
+      weatherData
+    );
+
+  }
+);
+
+// =====================================================
+// SENSOR HISTORY
+// =====================================================
+
+app.get(
+  "/api/history",
+  (req, res) => {
+
+    res.json({
+
+      success:
+        true,
+
+      count:
+        sensorHistory.length,
+
+      data:
+        sensorHistory
+
+    });
+
+  }
+);
+
+// =====================================================
+// INTERNET WEATHER
+// =====================================================
+
+app.get(
+  "/api/weather",
+  async (req, res) => {
+
+    const data =
+      await fetchInternetWeather();
+
+    res.json({
+
+      success:
+        true,
+
+      data
+
+    });
+
+  }
+);
+
+// =====================================================
 // START SERVER
-// ===============================
+// =====================================================
 
 app.listen(
   PORT,

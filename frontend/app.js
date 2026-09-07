@@ -1,30 +1,67 @@
 // =====================================================
-// NOVA WeatherSense - Frontend JavaScript
+// NOVA WeatherSense
+// Frontend Application
 // =====================================================
 
-const API_URL = "https://nova-weathersense.onrender.com";
+const API_URL =
+    "https://nova-weathersense.onrender.com";
+
 
 // =====================================================
 // ELEMENTS
 // =====================================================
 
-const connection = document.getElementById("connection");
+const connection =
+    document.getElementById("connection");
 
-const condition = document.getElementById("condition");
-const updated = document.getElementById("updated");
-const deviceId = document.getElementById("deviceId");
+const condition =
+    document.getElementById("condition");
 
-const temp = document.getElementById("temp");
-const humidity = document.getElementById("humidity");
-const rain = document.getElementById("rain");
-const deviceStatus = document.getElementById("deviceStatus");
+const updated =
+    document.getElementById("updated");
 
-const locationElement = document.getElementById("location");
-const forecast = document.getElementById("forecast");
-const rainProbability = document.getElementById("rainProbability");
-const wind = document.getElementById("wind");
+const deviceId =
+    document.getElementById("deviceId");
 
-const smartStatus = document.getElementById("smartStatus");
+const temp =
+    document.getElementById("temp");
+
+const humidity =
+    document.getElementById("humidity");
+
+const rain =
+    document.getElementById("rain");
+
+const deviceStatus =
+    document.getElementById("deviceStatus");
+
+const locationElement =
+    document.getElementById("location");
+
+const forecast =
+    document.getElementById("forecast");
+
+const rainProbability =
+    document.getElementById("rainProbability");
+
+const wind =
+    document.getElementById("wind");
+
+const smartStatus =
+    document.getElementById("smartStatus");
+
+const historyCount =
+    document.getElementById("historyCount");
+
+
+// =====================================================
+// CHART VARIABLES
+// =====================================================
+
+let temperatureChart = null;
+
+let humidityChart = null;
+
 
 // =====================================================
 // SENSOR DATA
@@ -34,37 +71,44 @@ async function updateSensorData() {
 
     try {
 
-        const response = await fetch(
-            `${API_URL}/api/sensor`
-        );
+        const response =
+            await fetch(
+                `${API_URL}/api/sensor`
+            );
 
         if (!response.ok) {
-            throw new Error("Sensor API error");
+
+            throw new Error(
+                "Sensor API error"
+            );
+
         }
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
-        // -------------------------------
+
         // Connection
-        // -------------------------------
 
-        connection.textContent = "● ONLINE";
-        connection.className = "status online";
+        connection.textContent =
+            "● ONLINE";
 
-        // -------------------------------
+        connection.className =
+            "status online";
+
+
         // Device
-        // -------------------------------
 
         deviceId.textContent =
-            data.deviceId || "nova-weather-01";
+            data.deviceId ||
+            "nova-weather-01";
 
-        // -------------------------------
+
         // Temperature
-        // -------------------------------
 
         if (
-            typeof data.temperature === "number" &&
-            !Number.isNaN(data.temperature)
+            typeof data.temperature ===
+            "number"
         ) {
 
             temp.textContent =
@@ -72,17 +116,17 @@ async function updateSensorData() {
 
         } else {
 
-            temp.textContent = "--";
+            temp.textContent =
+                "--";
 
         }
 
-        // -------------------------------
+
         // Humidity
-        // -------------------------------
 
         if (
-            typeof data.humidity === "number" &&
-            !Number.isNaN(data.humidity)
+            typeof data.humidity ===
+            "number"
         ) {
 
             humidity.textContent =
@@ -90,72 +134,67 @@ async function updateSensorData() {
 
         } else {
 
-            humidity.textContent = "--";
+            humidity.textContent =
+                "--";
 
         }
 
-        // -------------------------------
-        // Rain Sensor
-        // -------------------------------
+
+        // Rain
 
         rain.textContent =
-            data.rain || "UNKNOWN";
+            data.rain ||
+            "UNKNOWN";
 
-        // -------------------------------
-        // Device Status
-        // -------------------------------
+
+        // Device status
 
         deviceStatus.textContent =
-            data.wifi || "OFFLINE";
+            data.wifi ||
+            "OFFLINE";
 
-        // -------------------------------
-        // Last Update
-        // -------------------------------
+
+        // Last update
 
         if (data.lastUpdate) {
 
             const time =
-                new Date(data.lastUpdate);
+                new Date(
+                    data.lastUpdate
+                );
 
             updated.textContent =
                 "Last sensor update: " +
                 time.toLocaleString();
 
-        } else {
-
-            updated.textContent =
-                "No sensor data received yet";
-
         }
 
-        // -------------------------------
-        // Basic Condition
-        // -------------------------------
 
-        if (data.rain === "WET") {
+        // Condition
+
+        if (
+            data.rain === "WET"
+        ) {
 
             condition.textContent =
                 "Rain Detected";
 
-        } else if (data.rain === "DRY") {
+        } else {
 
             condition.textContent =
                 "Weather Monitoring Active";
 
-        } else {
-
-            condition.textContent =
-                "Monitoring Weather...";
-
         }
 
-        // Update smart status
+
         updateSmartStatus();
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(
-            "Sensor data error:",
+            "Sensor error:",
             error
         );
 
@@ -184,15 +223,21 @@ async function updateInternetWeather() {
 
     try {
 
-        const response = await fetch(
-            `${API_URL}/api/weather`
-        );
+        const response =
+            await fetch(
+                `${API_URL}/api/weather`
+            );
 
         if (!response.ok) {
-            throw new Error("Weather API error");
+
+            throw new Error(
+                "Weather API error"
+            );
+
         }
 
-        const result = await response.json();
+        const result =
+            await response.json();
 
         if (
             !result.success ||
@@ -205,41 +250,37 @@ async function updateInternetWeather() {
 
         }
 
-        const data = result.data;
+        const data =
+            result.data;
 
-        // -------------------------------
+
         // Location
-        // -------------------------------
 
         locationElement.textContent =
-            data.location || "Unknown";
+            data.location ||
+            "Unknown";
 
-        // -------------------------------
-        // Internet Weather
-        // -------------------------------
 
-        if (data.condition) {
+        // Weather
 
-            forecast.textContent =
-                capitalize(data.condition);
+        forecast.textContent =
+            capitalize(
+                data.condition ||
+                "Unavailable"
+            );
 
-        } else {
 
-            forecast.textContent =
-                "Unavailable";
-
-        }
-
-        // -------------------------------
-        // Rain Probability
-        // -------------------------------
+        // Rain probability
 
         if (
-            typeof data.rainProbability === "number"
+            typeof data.rainProbability ===
+            "number"
         ) {
 
             rainProbability.textContent =
-                `${Math.round(data.rainProbability)}%`;
+                `${Math.round(
+                    data.rainProbability
+                )}%`;
 
         } else {
 
@@ -248,12 +289,12 @@ async function updateInternetWeather() {
 
         }
 
-        // -------------------------------
+
         // Wind
-        // -------------------------------
 
         if (
-            typeof data.wind === "number"
+            typeof data.wind ===
+            "number"
         ) {
 
             wind.textContent =
@@ -266,21 +307,20 @@ async function updateInternetWeather() {
 
         }
 
-        // Update smart status
+
         updateSmartStatus();
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(
-            "Internet weather error:",
+            "Weather error:",
             error
         );
 
-        locationElement.textContent =
-            "Weather unavailable";
-
         forecast.textContent =
-            "Unable to fetch weather";
+            "Unavailable";
 
         rainProbability.textContent =
             "--";
@@ -288,7 +328,338 @@ async function updateInternetWeather() {
         wind.textContent =
             "--";
 
-        updateSmartStatus();
+    }
+
+}
+
+
+// =====================================================
+// SENSOR HISTORY
+// =====================================================
+
+async function updateHistory() {
+
+    try {
+
+        const response =
+            await fetch(
+                `${API_URL}/api/history`
+            );
+
+        if (!response.ok) {
+
+            throw new Error(
+                "History API error"
+            );
+
+        }
+
+        const result =
+            await response.json();
+
+        if (
+            !result.success ||
+            !Array.isArray(result.data)
+        ) {
+
+            return;
+
+        }
+
+        const history =
+            result.data;
+
+
+        historyCount.textContent =
+            `${history.length} readings`;
+
+
+        if (history.length === 0) {
+
+            return;
+
+        }
+
+
+        // =================================================
+        // LABELS
+        // =================================================
+
+        const labels =
+            history.map(
+                item => {
+
+                    const date =
+                        new Date(
+                            item.timestamp
+                        );
+
+                    return date.toLocaleTimeString(
+                        [],
+                        {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit"
+                        }
+                    );
+
+                }
+            );
+
+
+        // =================================================
+        // TEMPERATURE VALUES
+        // =================================================
+
+        const temperatures =
+            history.map(
+                item =>
+                    item.temperature
+            );
+
+
+        // =================================================
+        // HUMIDITY VALUES
+        // =================================================
+
+        const humidities =
+            history.map(
+                item =>
+                    item.humidity
+            );
+
+
+        // =================================================
+        // TEMPERATURE CHART
+        // =================================================
+
+        const temperatureCanvas =
+            document.getElementById(
+                "temperatureChart"
+            );
+
+        if (temperatureChart) {
+
+            temperatureChart.destroy();
+
+        }
+
+
+        temperatureChart =
+            new Chart(
+                temperatureCanvas,
+                {
+
+                    type: "line",
+
+                    data: {
+
+                        labels,
+
+                        datasets: [
+
+                            {
+
+                                label:
+                                    "Temperature °C",
+
+                                data:
+                                    temperatures,
+
+                                tension:
+                                    0.35,
+
+                                fill:
+                                    false,
+
+                                pointRadius:
+                                    2
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive:
+                            true,
+
+                        maintainAspectRatio:
+                            false,
+
+                        animation:
+                            false,
+
+                        plugins: {
+
+                            legend: {
+
+                                display:
+                                    true
+
+                            }
+
+                        },
+
+                        scales: {
+
+                            y: {
+
+                                title: {
+
+                                    display:
+                                        true,
+
+                                    text:
+                                        "°C"
+
+                                }
+
+                            },
+
+                            x: {
+
+                                ticks: {
+
+                                    maxTicksLimit:
+                                        8
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+
+        // =================================================
+        // HUMIDITY CHART
+        // =================================================
+
+        const humidityCanvas =
+            document.getElementById(
+                "humidityChart"
+            );
+
+        if (humidityChart) {
+
+            humidityChart.destroy();
+
+        }
+
+
+        humidityChart =
+            new Chart(
+                humidityCanvas,
+                {
+
+                    type: "line",
+
+                    data: {
+
+                        labels,
+
+                        datasets: [
+
+                            {
+
+                                label:
+                                    "Humidity %",
+
+                                data:
+                                    humidities,
+
+                                tension:
+                                    0.35,
+
+                                fill:
+                                    false,
+
+                                pointRadius:
+                                    2
+
+                            }
+
+                        ]
+
+                    },
+
+                    options: {
+
+                        responsive:
+                            true,
+
+                        maintainAspectRatio:
+                            false,
+
+                        animation:
+                            false,
+
+                        plugins: {
+
+                            legend: {
+
+                                display:
+                                    true
+
+                            }
+
+                        },
+
+                        scales: {
+
+                            y: {
+
+                                title: {
+
+                                    display:
+                                        true,
+
+                                    text:
+                                        "%"
+
+                                },
+
+                                min:
+                                    0,
+
+                                max:
+                                    100
+
+                            },
+
+                            x: {
+
+                                ticks: {
+
+                                    maxTicksLimit:
+                                        8
+
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+            );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "History error:",
+            error
+        );
 
     }
 
@@ -302,21 +673,30 @@ async function updateInternetWeather() {
 function updateSmartStatus() {
 
     const localRain =
-        rain.textContent.trim().toUpperCase();
+        rain.textContent
+            .trim()
+            .toUpperCase();
+
 
     const probabilityText =
         rainProbability.textContent
-            .replace("%", "")
+            .replace(
+                "%",
+                ""
+            )
             .trim();
 
+
     const probability =
-        parseFloat(probabilityText);
+        parseFloat(
+            probabilityText
+        );
 
-    // -------------------------------
-    // Local sensor says WET
-    // -------------------------------
 
-    if (localRain === "WET") {
+    if (
+        localRain ===
+        "WET"
+    ) {
 
         smartStatus.textContent =
             "🌧️ RAIN DETECTED";
@@ -325,12 +705,11 @@ function updateSmartStatus() {
 
     }
 
-    // -------------------------------
-    // Rain probability is high
-    // -------------------------------
 
     if (
-        !Number.isNaN(probability) &&
+        !Number.isNaN(
+            probability
+        ) &&
         probability >= 60
     ) {
 
@@ -341,12 +720,11 @@ function updateSmartStatus() {
 
     }
 
-    // -------------------------------
-    // Rain probability is low
-    // -------------------------------
 
     if (
-        !Number.isNaN(probability) &&
+        !Number.isNaN(
+            probability
+        ) &&
         probability < 30
     ) {
 
@@ -357,9 +735,6 @@ function updateSmartStatus() {
 
     }
 
-    // -------------------------------
-    // Otherwise
-    // -------------------------------
 
     smartStatus.textContent =
         "🌥️ WEATHER UNCERTAIN";
@@ -368,19 +743,23 @@ function updateSmartStatus() {
 
 
 // =====================================================
-// CAPITALIZE TEXT
+// CAPITALIZE
 // =====================================================
 
 function capitalize(text) {
 
     if (!text) {
+
         return "";
+
     }
 
     return text
         .toString()
-        .replace(/\b\w/g, char =>
-            char.toUpperCase()
+        .replace(
+            /\b\w/g,
+            char =>
+                char.toUpperCase()
         );
 
 }
@@ -391,12 +770,14 @@ function capitalize(text) {
 // =====================================================
 
 updateSensorData();
+
 updateInternetWeather();
+
+updateHistory();
 
 
 // =====================================================
-// LIVE SENSOR UPDATE
-// Every 3 seconds
+// LIVE SENSOR
 // =====================================================
 
 setInterval(
@@ -406,8 +787,19 @@ setInterval(
 
 
 // =====================================================
-// INTERNET WEATHER UPDATE
-// Every 10 minutes
+// HISTORY
+// Refresh every 10 seconds
+// =====================================================
+
+setInterval(
+    updateHistory,
+    10000
+);
+
+
+// =====================================================
+// INTERNET WEATHER
+// Refresh every 10 minutes
 // =====================================================
 
 setInterval(

@@ -17,12 +17,9 @@
   >
 </head>
 
-
 <body>
 
   <div class="app">
-
-    <!-- ================= HEADER ================= -->
 
     <header>
 
@@ -42,7 +39,6 @@
 
       </div>
 
-
       <div
         id="connection"
         class="status offline"
@@ -53,12 +49,7 @@
     </header>
 
 
-    <!-- ================= MAIN ================= -->
-
     <main>
-
-
-      <!-- ================= HERO ================= -->
 
       <section class="hero">
 
@@ -78,7 +69,6 @@
 
         </div>
 
-
         <div class="device">
 
           <span>
@@ -94,13 +84,7 @@
       </section>
 
 
-
-      <!-- ================= SENSOR CARDS ================= -->
-
       <section class="grid">
-
-
-        <!-- Temperature -->
 
         <article class="card">
 
@@ -123,9 +107,6 @@
         </article>
 
 
-
-        <!-- Humidity -->
-
         <article class="card">
 
           <span>
@@ -147,9 +128,6 @@
         </article>
 
 
-
-        <!-- Rain Sensor -->
-
         <article class="card">
 
           <span>
@@ -162,9 +140,6 @@
 
         </article>
 
-
-
-        <!-- Device Status -->
 
         <article class="card">
 
@@ -181,13 +156,7 @@
       </section>
 
 
-
-      <!-- ================= INTERNET WEATHER ================= -->
-
       <section class="info">
-
-
-        <!-- Location -->
 
         <div>
 
@@ -202,9 +171,6 @@
         </div>
 
 
-
-        <!-- Internet Weather -->
-
         <div>
 
           <span>
@@ -217,9 +183,6 @@
 
         </div>
 
-
-
-        <!-- Rain Probability -->
 
         <div>
 
@@ -234,9 +197,6 @@
         </div>
 
 
-
-        <!-- Wind -->
-
         <div>
 
           <span>
@@ -249,12 +209,8 @@
 
         </div>
 
-
       </section>
 
-
-
-      <!-- ================= SMART STATUS ================= -->
 
       <section class="smart-status">
 
@@ -269,11 +225,74 @@
       </section>
 
 
+      <!-- ========================================= -->
+      <!-- HISTORICAL DATA -->
+      <!-- ========================================= -->
+
+      <section class="history">
+
+        <div class="history-header">
+
+          <div>
+
+            <span class="eyebrow">
+              SENSOR HISTORY
+            </span>
+
+            <h2>
+              Temperature & Humidity
+            </h2>
+
+          </div>
+
+          <span id="historyCount">
+            0 readings
+          </span>
+
+        </div>
+
+
+        <!-- Temperature Graph -->
+
+        <div class="chart-card">
+
+          <h3>
+            🌡️ Temperature History
+          </h3>
+
+          <div class="chart-container">
+
+            <canvas
+              id="temperatureChart"
+            ></canvas>
+
+          </div>
+
+        </div>
+
+
+        <!-- Humidity Graph -->
+
+        <div class="chart-card">
+
+          <h3>
+            💧 Humidity History
+          </h3>
+
+          <div class="chart-container">
+
+            <canvas
+              id="humidityChart"
+            ></canvas>
+
+          </div>
+
+        </div>
+
+      </section>
+
     </main>
 
-
-
-    <!-- ================= FOOTER ================= -->
 
     <footer>
 
@@ -283,12 +302,10 @@
 
     </footer>
 
-
   </div>
 
 
-
-  <!-- ================= JAVASCRIPT ================= -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script src="app.js"></script>
 
