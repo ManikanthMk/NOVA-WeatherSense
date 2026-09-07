@@ -1,2 +1,53 @@
-const API_URL="https://nova-weathersense.onrender.com";';
-async function updateDashboard(){try{const r=await fetch(`${API_URL}/api/sensor`,{cache:'no-store'});if(!r.ok)throw Error();const d=await r.json();document.getElementById('connection').textContent='● ONLINE';document.getElementById('connection').className='status online';document.getElementById('deviceId').textContent=d.deviceId||'—';document.getElementById('temp').textContent=d.temperature==null?'--':Number(d.temperature).toFixed(1);document.getElementById('humidity').textContent=d.humidity==null?'--':Number(d.humidity).toFixed(1);document.getElementById('rain').textContent=d.rain||'UNKNOWN';document.getElementById('deviceStatus').textContent=d.wifi||'OFFLINE';const rain=String(d.rain||'').toUpperCase();document.getElementById('condition').textContent=rain==='WET'?'Rain detected':rain==='DRY'?'Currently dry':'Waiting for sensor...';document.getElementById('updated').textContent=d.lastUpdate?`Last update: ${new Date(d.lastUpdate).toLocaleString()}`:'No data received yet'}catch(e){document.getElementById('connection').textContent='● OFFLINE';document.getElementById('connection').className='status offline';document.getElementById('deviceStatus').textContent='OFFLINE'}}updateDashboard();setInterval(updateDashboard,3000);
+const API_URL = "https://nova-weathersense.onrender.com";
+
+async function updateDashboard() {
+  try {
+    const r = await fetch(`${API_URL}/api/sensor`, {
+      cache: "no-store"
+    });
+
+    if (!r.ok) throw Error();
+
+    const d = await r.json();
+
+    document.getElementById("connection").textContent = "● ONLINE";
+    document.getElementById("connection").className = "status online";
+
+    document.getElementById("deviceId").textContent =
+      d.deviceId || "—";
+
+    document.getElementById("temp").textContent =
+      d.temperature == null ? "--" : Number(d.temperature).toFixed(1);
+
+    document.getElementById("humidity").textContent =
+      d.humidity == null ? "--" : Number(d.humidity).toFixed(1);
+
+    document.getElementById("rain").textContent =
+      d.rain || "UNKNOWN";
+
+    document.getElementById("deviceStatus").textContent =
+      d.wifi || "OFFLINE";
+
+    const rain = String(d.rain || "").toUpperCase();
+
+    document.getElementById("condition").textContent =
+      rain === "WET"
+        ? "Rain detected"
+        : rain === "DRY"
+        ? "Currently dry"
+        : "Waiting for sensor...";
+
+    document.getElementById("updated").textContent =
+      d.lastUpdate
+        ? `Last update: ${new Date(d.lastUpdate).toLocaleString()}`
+        : "No data received yet";
+
+  } catch (e) {
+    document.getElementById("connection").textContent = "● OFFLINE";
+    document.getElementById("connection").className = "status offline";
+    document.getElementById("deviceStatus").textContent = "OFFLINE";
+  }
+}
+
+updateDashboard();
+setInterval(updateDashboard, 3000);
